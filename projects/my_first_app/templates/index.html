@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block title %}{{super()}} Home{% endblock %}}
+
+{% block body %}
+    <!-- the call to super will render the code inside the base.html body block ("Home"). Otherwise it will be ommited -->
+    {{ super() }}
+    <p>This is the home page</p>
+{% endblock %}

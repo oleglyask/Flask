@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}
+    {{super()}}
+    {% if username %}
+        User {{ username }}
+    {% endif %}
+{% endblock title%}
+
+{% block navbar %}
+    {{ super() }}
+{% endblock navbar %}
+
+{% block content %}
+    {{super()}}
+    <h1>
+        {% if username %}
+            Hello, {{ username }}!
+        {% else %}
+            Hello, Anonymous!
+        {% endif %}
+    </h1>
+{% endblock %}
