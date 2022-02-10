@@ -20,6 +20,7 @@
                 <ul class="nav navbar-nav">
                     <li><a href="/">Home</a></li>
                     <li><a href="/user">User</a></li>
+                    <li><a href="/zodiac">Zodiac</a></li>
                 </ul>
             </div>
         </div>
@@ -28,7 +29,13 @@
 
 {% block content %}
 <div class="container">
-    {% block page_contenet %}
+    {% for msg in get_flashed_messages() %}
+        <div class="alert alert-warning">
+            <button type="button" class="done" data-dismiss="alert">&times;</button>
+            {{ msg }}
+        </div>
+    {% endfor %}
+    {% block page_content %}
 
     {% endblock %}
 </div>

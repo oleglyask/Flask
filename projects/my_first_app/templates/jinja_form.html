@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}{{super()}} Home{% endblock %}}
+
+{% block content %}
+    {{ super() }}
+    <p>Welcome, {% if name %} {{ name }} {% else %} Annonymous {% endif %}  </p>
+
+    <!-- This is the Jinja (non Bootstrap) way of creating a FORM -->
+    <form action="POST">
+        <!-- implemtns CSRF protection -->
+        {{ form.hidden_tag() }}
+        <!-- Creates a text field (label provides the text rendered) (form.name creates the text box) (id is optional to create an id) -->
+        {{ form.name.label }} {{ form.name(id='my-field-id') }}
+        <!-- Creates a submit button -->
+        {{ form.submit() }}
+    </form>
+
+
+
+{% endblock %}

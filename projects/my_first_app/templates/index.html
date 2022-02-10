@@ -1,9 +1,18 @@
 {% extends 'base.html' %}
+{% import 'bootstrap/wtf.html' as wtf %}
 
 {% block title %}{{super()}} Home{% endblock %}}
 
-{% block body %}
-    <!-- the call to super will render the code inside the base.html body block ("Home"). Otherwise it will be ommited -->
+{% block content %}
     {{ super() }}
-    <p>This is the home page</p>
+    {% if known %}
+        <p>Welcome back, {{ name }}</p>
+    {% else %}
+        <p>Welcome to the community, {{ name }}</p>
+    {% endif %}
+
+   <!-- Bootstrap creation of a FORM -->
+    {{ wtf.quick_form(form) }}
+
+
 {% endblock %}

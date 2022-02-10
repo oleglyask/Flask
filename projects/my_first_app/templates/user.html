@@ -3,6 +3,8 @@
     {{super()}}
     {% if username %}
         User {{ username }}
+    {% else %}
+        User Anonymous
     {% endif %}
 {% endblock title%}
 
@@ -11,7 +13,7 @@
 {% endblock navbar %}
 
 {% block content %}
-    {{super()}}
+    {{ super() }}
     <h1>
         {% if username %}
             Hello, {{ username }}!
