@@ -31,6 +31,11 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize database object
 db = SQLAlchemy(app)
+# migrate manages version control of database if the structure changes
+# flask db init - initial creation when starting to work on the project
+# flask db migrate -m "comments" - migrates the database after changes have been made to models and the first time after "flask db init"
+# check the script inside the migrations/version directory to verify that changes reflect the one you made
+# flask db upgrade -  run after "flask db migrate" to commit changes
 migrate = Migrate(app, db, render_as_batch=True) #render_as_batch is for sqlite only
 
 # Create table models

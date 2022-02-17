@@ -1,0 +1,14 @@
+{
+    "name": "Python: Test All",
+    "type": "python",
+    "request": "launch",
+    "module": "pytest",
+    "env": {
+        "DATABASE_TEST_URL": "sqlite:///${workspaceFolder}/data-test.sqlite",
+        "PYTHONPATH": ". tests"
+    },
+    "args": [
+        "${workspaceFolder}/tests/",
+        "--show-capture=stdout",
+    ]
+}
