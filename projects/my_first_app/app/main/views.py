@@ -1,13 +1,15 @@
 from flask import redirect, render_template, session, flash, url_for
+from flask_login import login_required
 from . import main
 from .. import db
-from .forms import NameForm
+# from .forms import NameForm
 from ..models import User, Role
 
 # Home page
 @main.route('/', methods=['GET', 'POST'])
 def index():
-    form = NameForm()
+
+    """    form = NameForm()
     # if form has been submitted. This will get called only on  'POST' requests with successful validate
     if form.validate_on_submit():
         name_entered = form.name.data
@@ -30,4 +32,13 @@ def index():
         # call the index() again but as a "GET" so if user refreshes, it will refresh with "GET" and NOT 'POST'
         return redirect(url_for('main.index'))
     # this will get called only on GET requests
-    return render_template('index.html', form=form, name=session.get('name'), known=session.get('known', False))
+    # return render_template('index.html', form=form, name=session.get('name'), known=session.get('known', False)) """
+
+    return render_template('index.html')
+
+
+@main.route('/top-secret')
+# the following decorator will check if the user is loggin in and redirect to login if not and back afterwards.
+@login_required
+def top_secret():
+    return 'This is the top secret page'

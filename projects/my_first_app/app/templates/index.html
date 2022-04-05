@@ -5,14 +5,11 @@
 
 {% block content %}
     {{ super() }}
-    {% if known %}
-        <p>Welcome back, {{ name }}</p>
-    {% else %}
-        <p>Welcome to the community, {{ name }}</p>
-    {% endif %}
-
-   <!-- Bootstrap creation of a FORM -->
-    {{ wtf.quick_form(form) }}
-
-
+    <p>Welcome,
+    {% if current_user.is_authenticated %}
+        {{ current_user.username }}
+    {%- else %}
+        Anonymous
+    {%- endif %}!
+    </p>
 {% endblock %}

@@ -19,8 +19,12 @@
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
                     <li><a href="/">Home</a></li>
-                    <li><a href="/user">User</a></li>
-                    <li><a href="/zodiac">Zodiac</a></li>
+                    <!-- below variable will check for the current User model, also available to use in views. -->
+                    {% if current_user.is_authenticated %}
+                        <li><a href="{{ url_for('auth.logout') }}">Log Out</a></li>
+                    {% else %}
+                        <li><a href="{{ url_for('auth.login') }}">Log In</a></li>
+                    {% endif %}
                 </ul>
             </div>
         </div>

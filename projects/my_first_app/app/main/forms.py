@@ -6,6 +6,7 @@ from wtforms.validators import DataRequired
 class NameForm(FlaskForm):
     name = StringField("Enter your Name", validators=[DataRequired()])
     submit = SubmitField("Submit")
+
 # birthday form
 class BirthdayForm(FlaskForm):
     name = StringField("Name", validators=[DataRequired()])

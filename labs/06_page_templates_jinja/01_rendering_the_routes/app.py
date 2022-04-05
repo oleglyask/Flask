@@ -46,3 +46,7 @@ def costumes():
     # Emily wants to list her costumes above (listed above)
     # for now she put a placeholder
     return render_template('costumes.html', costumes=costumes_list)
+
+@app.errorhandler(404)
+def error_handler(e):
+    return render_template('error.html', error='404', name="Page not Found"), 404
