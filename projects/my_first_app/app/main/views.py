@@ -4,6 +4,8 @@ from . import main
 from .. import db
 # from .forms import NameForm
 from ..models import User, Role
+from ..decorators import admin_required, permission_required
+from ..models import Permission
 
 # Home page
 @main.route('/', methods=['GET', 'POST'])
@@ -37,8 +39,20 @@ def index():
     return render_template('index.html')
 
 
-@main.route('/top-secret')
-# the following decorator will check if the user is loggin in and redirect to login if not and back afterwards.
+# route() comes first
+# then check if user authenticated
+# then check their permission
+# The topmost decorators are "evaluated" before the others
+
+@main.route('/admin')
 @login_required
-def top_secret():
-    return 'This is the top secret page'
+@admin_required
+def for_admins_only():
+    return "Welcome, administrator!"
+
+
+@main.route('/moderate')
+@login_required
+@permission_required(Permission.MODERATE)
+def for_moderators_only():
+    return "Greetings, moderator!"

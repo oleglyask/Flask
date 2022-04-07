@@ -1,7 +1,7 @@
 import os
 from flask_migrate import Migrate
 from .app import create_app, db
-from .app.models import User, Role
+from .app.models import Permission, User, Role
 
 
 # create the app instance
@@ -19,4 +19,4 @@ migrate = Migrate(app, db, render_as_batch=True) #render_as_batch is for sqlite 
 
 @app.shell_context_processor
 def make_shell_context():
-    return dict(db=db, User=User, Role=Role)
+    return dict(db=db, User=User, Role=Role, Permission=Permission)
