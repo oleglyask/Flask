@@ -1,24 +1,54 @@
 {% extends "base.html" %}
-{% block title %}
-    {{super()}}
-    {% if username %}
-        User {{ username }}
-    {% else %}
-        User Anonymous
-    {% endif %}
-{% endblock title%}
+{% block title %}{{super()}} User {{user_name}}{% endblock title %}
 
 {% block navbar %}
     {{ super() }}
 {% endblock navbar %}
 
-{% block content %}
-    {{ super() }}
-    <h1>
-        {% if username %}
-            Hello, {{ username }}!
-        {% else %}
-            Hello, Anonymous!
+{% block page_content %}
+{{ super() }}
+<div class="page-header">
+    <img class="img-rounded profile-thumbnail" src="{{ user.unicornify() }}">
+    <div class="profile-header">
+        <h1>{{ user.username }}</h1>
+        <table class="table">
+            <tbody>
+            <tr>
+            <th scope="row">Name</th>
+            <td>{% if user.name %}{{ user.name }}{% endif %}</td>
+            </tr>
+            <tr>
+            <th scope="row">Location</th>
+            <td>{% if user.location %}{{ user.location }}{% endif %}</td>
+            </tr>
+            {% if current_user.is_administrator() %}
+                <tr>
+                <th scope="row">Email</th>
+                <td><a href="mailto:{{ user.email }}">{{ user.email }}</a></td>
+                </tr>
+            {% endif %}
+            <tr>
+            <th scope="row">Bio</th>
+            <td>{% if user.bio %}{{ user.bio }}{% endif %}</td>
+            </tr>
+            <tr>
+            <th scope="row">Last seen</th>
+            <td>{{ moment(user.last_seen).fromNow() }}</td>
+            </tr>
+            </tbody>
+        </table>
+        <!-- user can edit its profile -->
+        {% if user == current_user %}
+        <a class="btn btn-default" href="{{ url_for('main.edit_profile') }}">
+            Edit Profile
+        </a>
         {% endif %}
-    </h1>
+        <!-- administrator can edit anyone's profile link -->
+        {% if current_user.is_administrator() %}
+        <a class="btn btn-danger" href="{{ url_for('main.admin_edit_profile', id=user.id) }}">
+            Edit as Admin
+        </a>
+        {% endif %}
+    </div>
+</div>
 {% endblock %}

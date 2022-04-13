@@ -6,6 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from ..config import config
 from flask_mail import Mail
+from flask_moment import Moment
 
 # Initialize Bootstrap by passing a Flask instance to it in the constructor
 bootstrap = Bootstrap()
@@ -16,6 +17,8 @@ login_manager = LoginManager()
 login_manager.login_view = 'auth.login' # View to redirect if @login_required
 # Initialize the Mail object
 mail = Mail()
+# Moment object will help convert time to user's local time
+moment = Moment()
 
 def create_app(config_name='default'):
 
@@ -29,6 +32,7 @@ def create_app(config_name='default'):
     db.init_app(app)
     login_manager.init_app(app)
     mail.init_app(app)
+    moment.init_app(app)
 
     # register bluprints with the app
     from .main import main as main_blueprint

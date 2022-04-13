@@ -1,4 +1,7 @@
 
+# import datetime
+from datetime import datetime
+import hashlib
 from . import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
@@ -94,14 +97,23 @@ class User(UserMixin, db.Model):
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     password_hash = db.Column(db.String(128))
     confirmed = db.Column(db.Boolean, default=False)
+    name = db.Column(db.String(64))
+    location = db.Column(db.String(64))
+    bio = db.Column(db.Text())
+    last_seen = db.Column(db.DateTime(), default=datetime.utcnow)
+    avatar_hash = db.Column(db.String(32))
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        # Assignes a role to the user. Default role is "user", if email matches Admin email, assigns admin role
         if self.role is None:
             if self.email == current_app.config['MY_APP_ADMIN']:
                 self.role = Role.query.filter_by(name='Administrator').first()
             if self.role is None:
                 self.role = Role.query.filter_by(default=True).first()
+        # Assigns a hash number to use to fethc the avatar picture
+        if self.email is not None and self.avatar_hash is None:
+            self.avatar_hash = self.email_hash()
 
     def __repr__(self):
         return f"<User {self.username}>"
@@ -147,6 +159,22 @@ class User(UserMixin, db.Model):
     # checks if the user is administrator
     def is_administrator(self):
         return self.can(Permission.ADMIN)
+
+    # will update the last seen column
+    def ping(self):
+        self.last_seen = datetime.utcnow()
+        db.session.add(self)
+        db.session.commit()
+
+    # Returns a hash number based on the email address
+    def email_hash(self):
+        return hashlib.md5(self.email.lower().encode('utf-8')).hexdigest()
+
+    # will return a url string to request a Unicorn profile picture from Unicornify.com
+    def unicornify(self, size=128):
+        url = 'https://unicornify.pictures/avatar'
+        hash = self.avatar_hash or self.email_hash()
+        return f'{url}/{hash}?s={size}'
 
 # User before they have signed in or registered
 class AnonymousUser(AnonymousUserMixin):

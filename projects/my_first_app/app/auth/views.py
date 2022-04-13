@@ -45,6 +45,16 @@ def logout():
     flash('Logged out')
     return redirect(url_for('main.index'))
 
+@auth.route('/change_password')
+@login_required
+def change_password():
+    return "Change password coming soon...."
+
+@auth.route('/change_email_request')
+@login_required
+def change_email_request():
+    return "Change email coming soon...."
+
 # Will take a token, attempt to confirm the user, then redirect to the index page
 @auth.route('/confirm/<token>')
 @login_required
@@ -67,19 +77,21 @@ def resend_confirmation():
     return redirect(url_for('main.index'))
 
 
-# There are several conditions that will trigger the user to be redirected to this new '/unconfirmed' route.
+# There are several conditions that will trigger the user to be redirected to '/unconfirmed' route.
 # The user must be logged in, as in current_user.is_authenticated is True
 # The user has not confirmed their email
 # The blueprint that handles the original request is not the auth blueprint (you'll still want to allow them to confirm their account!)
 # The request is not for a static file (in app/static)
 @auth.before_app_request
 def before_request():
-    if current_user.is_authenticated \
-            and not current_user.confirmed \
-            and request != 'static' \
-            and request.blueprint != 'auth' \
-            and request.endpoint != 'static':
-        return redirect(url_for('auth.unconfirmed'))
+    if current_user.is_authenticated:
+        # will update last seen field in the User model
+        current_user.ping()
+        if not current_user.confirmed \
+                and request.endpoint \
+                and request.blueprint != 'auth' \
+                and request.endpoint != 'static':
+            return redirect(url_for('auth.unconfirmed'))
 
 # There are several conditions that will trigger the user to be redirected to this new '/unconfirmed' route.
 # The user must be logged in, as in current_user.is_authenticated is True
