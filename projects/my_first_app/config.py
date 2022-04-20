@@ -18,6 +18,9 @@ class Config():
     MY_APP_MAIL_SUBJECT_PREFIX = 'My App — '
     MY_APP_MAIL_SENDER = f'My App Admin <{MY_APP_ADMIN}>'
 
+    MY_APP_COMPS_PER_PAGE = 2
+    MY_APP_FOLLOWERS_PER_PAGE = 2
+
     @staticmethod
     def init_app(app):
         pass

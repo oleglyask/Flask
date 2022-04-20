@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}{{super()}} Composition {% endblock title %}
+
+{% block navbar %}
+    {{ super() }}
+{% endblock navbar %}
+
+{% block content %}
+    {{super()}}
+    {% include "_compositions.html" %}
+{% endblock %}

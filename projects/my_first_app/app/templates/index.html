@@ -1,15 +1,30 @@
 {% extends 'base.html' %}
 {% import 'bootstrap/wtf.html' as wtf %}
+{% import "_macros.html" as macros %}
 
-{% block title %}{{super()}} Home{% endblock %}}
+{% block title %} {{super()}} Home {% endblock %}
+{% block head %} {{super()}} {% endblock %}
 
 {% block content %}
     {{ super() }}
-    <p>Welcome,
+    <h1>Welcome,
     {% if current_user.is_authenticated %}
         {{ current_user.username }}
     {%- else %}
-        Anonymous
+        to the App
     {%- endif %}!
-    </p>
+    </h1>
+
+    {% if current_user.can(Permission.PUBLISH) %}
+        {{ wtf.quick_form(form) }}
+    {% endif %}
+
+    {% include "_compositions.html" %}
+
+    {% if pagination and pagination.pages > 1 %}
+    <div class="pagination">
+        {{ macros.pagination_widget(pagination, 'main.index') }}
+    </div>
+    {% endif %}
+
 {% endblock %}

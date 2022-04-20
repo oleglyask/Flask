@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, SelectField, DateField, TextAreaField, BooleanField, ValidationError
 from wtforms.validators import DataRequired, Length, Regexp
-from ..models import User, Role
+from ..models import ReleaseType, User, Role
 
 # allows the user to edit its profile
 class EditProfileForm(FlaskForm):
@@ -21,7 +21,7 @@ class AdminLevelEditProfileForm(FlaskForm):
     confirmed = BooleanField("Confirmed")
     #coerce specifies what type the choice value should be return as (should match role in Model.py)
     # choices for the role field will be dynamically assigned in the view function
-    role = SelectField("Role", coerce=int)
+    role = SelectField("Role", coerce=int, validators=[DataRequired()])
     name = StringField("Name", validators=[Length(0, 64)])
     location = StringField("Location", validators=[Length(0,64)])
     bio = TextAreaField("Bio")
@@ -38,3 +38,19 @@ class AdminLevelEditProfileForm(FlaskForm):
     def validate_username(self, field):
         if User.query.filter_by(username=field.data).first() and field.data != self.user.username:
             raise ValidationError('Sorry! Username already in use.')
+
+#Social media content START
+#Allows the user to post a composition
+class CompositionForm(FlaskForm):
+    release_type = SelectField("Release Type", coerce=int, default=ReleaseType.SINGLE, validators=[DataRequired()])
+    title = StringField("Title", validators=[DataRequired()])
+    description = TextAreaField("Tell us about your composition")
+    submit = SubmitField("Submit")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.release_type.choices = [
+            (ReleaseType.SINGLE, 'Single'),
+            (ReleaseType.EXTENDED_PLAY, 'EP'),
+            (ReleaseType.ALBUM, 'Album')]
+#Social media content END

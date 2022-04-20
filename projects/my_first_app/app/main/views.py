@@ -1,44 +1,50 @@
-from flask import redirect, render_template, session, flash, url_for
+from flask import redirect, render_template, session, flash, url_for, current_app, request
 from flask_login import current_user, login_required
 
-from .forms import EditProfileForm, AdminLevelEditProfileForm
+from .forms import CompositionForm, EditProfileForm, AdminLevelEditProfileForm
 from . import main
 from .. import db
-from ..models import User, Role
+from ..models import Composition, User, Role
 from ..decorators import admin_required, permission_required
 from ..models import Permission
 
 # Home page
+#Social media content START
+#will display composition submit for and all the compositions posted
 @main.route('/', methods=['GET', 'POST'])
 def index():
+    form = CompositionForm()
+    if current_user.can(Permission.PUBLISH) \
+            and form.validate_on_submit():
+        composition = Composition(
+            release_type=form.release_type.data,
+            title=form.title.data,
+            description=form.description.data,
+            artist=current_user._get_current_object())
+        db.session.add(composition)
+        db.session.commit()
+        composition.generate_slug()
+        return redirect(url_for('.index'))
 
-    """    form = NameForm()
-    # if form has been submitted. This will get called only on  'POST' requests with successful validate
-    if form.validate_on_submit():
-        name_entered = form.name.data
-        user = User.query.filter_by(username=name_entered).first()
-        # if user doesn't exist yet, create one and set session[known] to False
-        if user == None:
-            role_id = Role.query.filter_by(name='user').first().id
-            user = User(username=name_entered, role_id=role_id)
-            db.session.add(user)
-            db.session.commit()
-            session['known'] = False
-        # if user exists then session[known] is True
-        else:
-            session['known'] = True
+    page = request.args.get('page', 1, type=int)
+    pagination = Composition.query.order_by(Composition.timestamp.desc()).paginate(
+            page,
+            per_page=current_app.config['MY_APP_COMPS_PER_PAGE'],
+            error_out=False)
+    compositions = pagination.items
+    return render_template(
+        'index.html',
+        form=form,
+        compositions=compositions,
+        pagination=pagination
+    )
 
-        # rememmber what was typed into the form with session
-        session['name'] = name_entered
-        # shows up as a message to the user
-        flash('Good Job')
-        # call the index() again but as a "GET" so if user refreshes, it will refresh with "GET" and NOT 'POST'
-        return redirect(url_for('main.index'))
-    # this will get called only on GET requests
-    # return render_template('index.html', form=form, name=session.get('name'), known=session.get('known', False)) """
-
-    return render_template('index.html')
-
+# Will render an individual post based on a slug(Model.Composition.slug)
+@main.route('/composition/<slug>')
+def composition(slug):
+    composition = Composition.query.filter_by(slug=slug).first_or_404()
+    return render_template('composition.html', compositions=[composition])
+#Social media content END
 
 # route() comes first
 # then check if user authenticated
@@ -60,9 +66,16 @@ def for_moderators_only():
 
 # will get a user object and render the user.html object.  If no user found, then 404 page will be rendered
 @main.route('/user/<username>')
+@login_required
 def user(username):
     user = User.query.filter_by(username=username).first_or_404()
-    return render_template('user.html', user=user)
+    page = request.args.get('page', 1, type=int)
+    pagination = Composition.query.order_by(Composition.timestamp.desc()).paginate(
+            page,
+            per_page=current_app.config['MY_APP_COMPS_PER_PAGE'],
+            error_out=False)
+    compositions = pagination.items
+    return render_template('user.html', user=user, compositions=compositions, pagination=pagination)
 
 # will allow user to edit it's profile
 @main.route('/edit-profile', methods=['GET', 'POST'])
@@ -108,3 +121,83 @@ def admin_edit_profile(id):
     form.location.data = user.location
     form.bio.data = user.bio
     return render_template('edit_profile.html', form=form)
+
+# The requested user to follow, specified in the URL, is loaded and verified
+# 1) to exist and 2) they are already being followed. Given those checks pass,
+# the user is followed and the session is finally committed to the database.
+@main.route('/follow/<username>')
+@login_required
+@permission_required(Permission.FOLLOW)
+def follow(username):
+    user = User.query.filter_by(username=username).first()
+    if user is None:
+        flash("That is not a valid user.")
+        return redirect(url_for('.index'))
+    if current_user.is_following(user):
+        flash("Looks like you are already following that user.")
+        return redirect(url_for('.user', username=username))
+    current_user.follow(user)
+    db.session.commit()
+    flash(f"You are now following {username}")
+    return redirect(url_for('.user', username=username))
+
+# Will unfollow a user
+@main.route('/unfollow/<username>')
+@login_required
+@permission_required(Permission.FOLLOW)
+def unfollow(username):
+    user = User.query.filter_by(username=username).first()
+    if user is None:
+        flash("That is not a valid user.")
+        return redirect(url_for('.index'))
+    if not current_user.is_following(user):
+        flash("Looks like you are not following that user.")
+        return redirect(url_for('.user', username=username))
+    current_user.unfollow(user)
+    db.session.commit()
+    flash(f"You are not following {username}")
+    return redirect(url_for('.user', username=username))
+
+# will compile a list of dictionaries of the user's followers and the timestamp
+@main.route('/followers/<username>')
+def followers(username):
+    user = User.query.filter_by(username=username).first()
+    if user is None:
+        flash("That is not a valid user.")
+        return redirect(url_for('.index'))
+    page = request.args.get('page', 1, type=int)
+    pagination = user.followers.paginate(
+        page,
+        per_page=current_app.config['MY_APP_FOLLOWERS_PER_PAGE'],
+        error_out=False)
+    # convert to only follower and timestamp
+    follows = [{'user': item.follower, 'timestamp': item.timestamp}
+               for item in pagination.items]
+    return render_template('followers.html',
+                           user=user,
+                           title_text="Followers of",
+                           endpoint='.followers',
+                           pagination=pagination,
+                           follows=follows)
+
+# will compile a list of dictionaries of the who users follows and the timestamp
+@main.route('/following/<username>')
+def following(username):
+    user = User.query.filter_by(username=username).first()
+    if user is None:
+        flash("That is not a valid user.")
+        return redirect(url_for('.index'))
+    page = request.args.get('page', 1, type=int)
+    pagination = user.following.paginate(
+        page,
+        per_page=current_app.config['MY_APP_FOLLOWERS_PER_PAGE'],
+        error_out=False)
+    # convert to only  who the user follows and timestamp
+    follows = [{'user': item.following, 'timestamp': item.timestamp}
+               for item in pagination.items]
+    return render_template('followers.html',
+                           user=user,
+                           title_text="Follows",
+                           endpoint='.following',
+                           pagination=pagination,
+                           follows=follows)

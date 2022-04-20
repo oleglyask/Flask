@@ -1,5 +1,10 @@
 {% extends "base.html" %}
-{% block title %}{{super()}} User {{user_name}}{% endblock title %}
+{% import "_macros.html" as macros %}
+
+{% block title %}
+    {{super()}}
+    User - {{user.username}}
+{% endblock title %}
 
 {% block navbar %}
     {{ super() }}
@@ -11,6 +16,32 @@
     <img class="img-rounded profile-thumbnail" src="{{ user.unicornify() }}">
     <div class="profile-header">
         <h1>{{ user.username }}</h1>
+
+        <!-- follow/unfollow button -->
+        {% if user != current_user and user.can(Permission.FOLLOW) %}
+        <a class="btn btn-default"
+            {% if current_user.is_following(user) %}
+                href="{{ url_for('main.unfollow', username=user.username) }}"> Unfollow
+            {% else %}
+                href="{{ url_for('main.follow', username=user.username) }}"> Follow
+            {% endif %}
+        </a>
+        {% endif %}
+        <!-- link to followers  -->
+        <a href="{{ url_for('main.followers', username=user.username) }}">Followers:</a>
+        <!-- number of followers -->
+        <span class="badge "> {{ user.followers.all()|length }} </span>
+        <!-- link to followed  -->
+        <a href="{{ url_for('main.following', username=user.username) }}">Following:</a>
+        <!-- number of followed -->
+        <span class="badge "> {{ user.following.all()|length }} </span>
+        <!-- shows if the user follows the current user -->
+        {% if user != current_user and user.is_following(current_user) %}
+        <span> | </span>
+        <span class="badge">Follows you</span>
+        {% endif %}
+
+
         <table class="table">
             <tbody>
             <tr>
@@ -51,4 +82,15 @@
         {% endif %}
     </div>
 </div>
+
+<!-- will fill in the code from the partial template _compositions.html -->
+<h3>Compositions by {{ user.username }}</h3>
+{% include "_compositions.html" %}
+
+{% if pagination and pagination.pages > 1  %}
+<div class="pagination">
+    {{ macros.pagination_widget(pagination, 'main.user', username=user.username) }}
+</div>
+{% endif %}
+
 {% endblock %}

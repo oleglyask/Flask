@@ -1,0 +1,30 @@
+<ul class="compositions"> {# All compositions #}
+    {% for composition in compositions %}
+    <li class="composition"> {# Single composition #}
+        <div class="composition-thumbnail"> {# Avatar #}
+            <a href="{{ url_for('main.user', username=composition.artist.username) }}">
+                <img class="img-rounded profile_thumbnail" src="{{ composition.artist.unicornify(size=32) }}">
+            </a>
+        </div>
+        <div class="composition-content"> {# Composition content #}
+            <div class="composition-date">{# date #}
+                {{ moment(composition.timestamp).fromNow() }}
+            </div>
+            <div class="composition-artist">{# username #}
+                {{ composition.artist.username }}
+            </div>
+            <div class="composition-release-type">{# release type #}
+                {{ ReleaseType.releaseTypeName(composition.release_type) }}
+            </div>
+            <div class="composition-title">{# title #}
+                <a href="{{ url_for('main.composition', slug=composition.slug) }}">
+                    {{ composition.title }}
+                </a>
+            </div>
+            <div> {# description #}
+                {{ composition.description }}
+            </div>
+        </div>
+    </li>
+    {% endfor %}
+</ul>

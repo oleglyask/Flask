@@ -9,6 +9,8 @@
     {{super()}}My App -
 {% endblock %}
 
+
+
 {% block navbar %}
     <div class="navbar navbar-default" role="navigation">
         <div class="container">
@@ -44,7 +46,7 @@
                             <img src="{{ current_user.unicornify(size=32) }}">
                             Account <b class="caret"></b>
                         </a>
-                        <ul class="dropdown-menu">
+                        <ul class="dropdown-menu ms-auto">
                             <li><a href="{{ url_for('auth.change_password') }}">Change Password</a></li>
                             <li><a href="{{ url_for('auth.change_email_request') }}">Change Email</a></li>
                             <li><a href="{{ url_for('auth.logout') }}">Log Out</a></li>
